@@ -24,7 +24,7 @@
 			"step": "installPlugin",
 			"pluginZipFile": {
 				"resource": "url",
-				"url": "https://github.com/user-attachments/files/27401611/create-block-theme.zip"
+				"url": "https://github.com/henriqueiamarino/create-block-theme/releases/download/preview-1/create-block-theme.zip"
 			}
 		}
 	]
