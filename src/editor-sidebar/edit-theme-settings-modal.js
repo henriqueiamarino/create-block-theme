@@ -2,7 +2,11 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import {
+	useState,
+	useEffect,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -15,6 +19,7 @@ import {
 	FlexBlock,
 	FormTokenField,
 	Modal,
+	Notice,
 	Button,
 	TabPanel,
 	PanelBody,
@@ -2099,6 +2104,29 @@ export const EditThemeSettingsModal = ( { onRequestClose } ) => {
 						'create-block-theme'
 					) }
 				</Text>
+				<Notice
+					status="warning"
+					isDismissible={ false }
+					className="cbt-save-disclaimer"
+				>
+					<div className="cbt-save-disclaimer__lines">
+						<div>
+							{ __(
+								'Changes you’ve saved in the Site Editor live in the database, not in your theme files.',
+								'create-block-theme'
+							) }
+						</div>
+						<div>
+							{ createInterpolateElement(
+								__(
+									'Click <strong>Save Changes to Theme</strong> first to write them to theme.json—otherwise the edits you make in this modal may conflict with or hide them.',
+									'create-block-theme'
+								),
+								{ strong: <strong /> }
+							) }
+						</div>
+					</div>
+				</Notice>
 				<TabPanel
 					className="create-block-theme__edit-theme-settings-tabs"
 					tabs={ tabs }
