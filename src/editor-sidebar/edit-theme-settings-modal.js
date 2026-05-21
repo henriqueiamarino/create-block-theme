@@ -2010,6 +2010,207 @@ const ShadowsTab = () => {
 	);
 };
 
+const formatBlockName = ( slug ) => {
+	const name = slug.includes( '/' ) ? slug.split( '/' )[ 1 ] : slug;
+	return name
+		.split( '-' )
+		.map( ( word ) => word.charAt( 0 ).toUpperCase() + word.slice( 1 ) )
+		.join( ' ' );
+};
+
+const formatChipLabel = ( key ) =>
+	key.startsWith( ':' ) ? key.slice( 1 ) : key;
+
+const BlockStyleChip = ( { propertyKey, onRemove } ) => (
+	<span className="cbt-block-style-chip">
+		<span className="cbt-block-style-chip__label">
+			{ formatChipLabel( propertyKey ) }
+		</span>
+		<Button
+			icon={ lineSolid }
+			label={ sprintf(
+				// translators: %s: property name (e.g. "color").
+				__( 'Remove %s', 'create-block-theme' ),
+				formatChipLabel( propertyKey )
+			) }
+			onClick={ onRemove }
+			className="cbt-block-style-chip__remove"
+		/>
+	</span>
+);
+
+const BlockStyleRow = ( { slug, styles, onRemoveProperty, onRemoveBlock } ) => {
+	const props = Object.keys( styles || {} ).sort();
+	return (
+		<Item className="cbt-palette-list-item">
+			<HStack alignment="top" spacing={ 3 }>
+				<div className="cbt-block-style-row__wrap">
+					<span className="cbt-block-style-row__name">
+						{ formatBlockName( slug ) }
+					</span>
+					{ props.map( ( key ) => (
+						<BlockStyleChip
+							key={ key }
+							propertyKey={ key }
+							onRemove={ () => onRemoveProperty( slug, key ) }
+						/>
+					) ) }
+				</div>
+				<Button
+					icon={ lineSolid }
+					label={ sprintf(
+						// translators: %s: block name.
+						__(
+							'Remove all customizations for %s',
+							'create-block-theme'
+						),
+						formatBlockName( slug )
+					) }
+					onClick={ onRemoveBlock }
+					className="cbt-palette-swatch-button"
+				/>
+			</HStack>
+		</Item>
+	);
+};
+
+const StylesTab = () => {
+	const themeBlockStyles = useSelect( ( select ) => {
+		const theme = select( 'core' ).getCurrentTheme();
+		return theme?.theme_json?.styles?.blocks;
+	}, [] );
+
+	const [ blockStyles, setBlockStyles ] = useState( {} );
+
+	useEffect( () => {
+		if ( themeBlockStyles ) {
+			setBlockStyles( themeBlockStyles );
+		}
+	}, [ themeBlockStyles ] );
+
+	const allBlocks = Object.keys( blockStyles ).sort();
+	const coreBlocks = allBlocks.filter( ( slug ) =>
+		slug.startsWith( 'core/' )
+	);
+	const thirdPartyBlocks = allBlocks.filter(
+		( slug ) => ! slug.startsWith( 'core/' )
+	);
+
+	const removeBlock = ( slug ) => {
+		const next = { ...blockStyles };
+		delete next[ slug ];
+		setBlockStyles( next );
+	};
+
+	const removeProperty = ( slug, key ) => {
+		const next = { ...blockStyles };
+		next[ slug ] = { ...next[ slug ] };
+		delete next[ slug ][ key ];
+		if ( Object.keys( next[ slug ] ).length === 0 ) {
+			delete next[ slug ];
+		}
+		setBlockStyles( next );
+	};
+
+	const restoreFor = ( isCore ) => {
+		const next = { ...blockStyles };
+		Object.keys( themeBlockStyles || {} ).forEach( ( slug ) => {
+			if ( slug.startsWith( 'core/' ) === isCore ) {
+				next[ slug ] = themeBlockStyles[ slug ];
+			}
+		} );
+		setBlockStyles( next );
+	};
+
+	const restoreCore = () => restoreFor( true );
+	const restoreThirdParty = () => restoreFor( false );
+
+	return (
+		<VStack spacing={ 4 }>
+			<Text>
+				{ __(
+					'Lists block-level customizations defined in your theme’s theme.json. Removing one strips the theme’s defaults for that block — users’ own Site Editor changes on top remain.',
+					'create-block-theme'
+				) }
+			</Text>
+			{ coreBlocks.length > 0 && (
+				<VStack spacing={ 1 }>
+					<HStack
+						className="cbt-palette-section-header"
+						justify="space-between"
+						alignment="center"
+					>
+						<BaseControl.VisualLabel>
+							{ __( 'Core blocks', 'create-block-theme' ) }
+						</BaseControl.VisualLabel>
+						<DropdownMenu
+							icon={ moreVertical }
+							label={ __( 'Options', 'create-block-theme' ) }
+							controls={ [
+								{
+									title: __(
+										'Restore all core blocks',
+										'create-block-theme'
+									),
+									onClick: restoreCore,
+								},
+							] }
+						/>
+					</HStack>
+					<ItemGroup isBordered isSeparated>
+						{ coreBlocks.map( ( slug ) => (
+							<BlockStyleRow
+								key={ slug }
+								slug={ slug }
+								styles={ blockStyles[ slug ] }
+								onRemoveProperty={ removeProperty }
+								onRemoveBlock={ () => removeBlock( slug ) }
+							/>
+						) ) }
+					</ItemGroup>
+				</VStack>
+			) }
+			{ thirdPartyBlocks.length > 0 && (
+				<VStack spacing={ 1 }>
+					<HStack
+						className="cbt-palette-section-header"
+						justify="space-between"
+						alignment="center"
+					>
+						<BaseControl.VisualLabel>
+							{ __( 'Third-party blocks', 'create-block-theme' ) }
+						</BaseControl.VisualLabel>
+						<DropdownMenu
+							icon={ moreVertical }
+							label={ __( 'Options', 'create-block-theme' ) }
+							controls={ [
+								{
+									title: __(
+										'Restore all third-party blocks',
+										'create-block-theme'
+									),
+									onClick: restoreThirdParty,
+								},
+							] }
+						/>
+					</HStack>
+					<ItemGroup isBordered isSeparated>
+						{ thirdPartyBlocks.map( ( slug ) => (
+							<BlockStyleRow
+								key={ slug }
+								slug={ slug }
+								styles={ blockStyles[ slug ] }
+								onRemoveProperty={ removeProperty }
+								onRemoveBlock={ () => removeBlock( slug ) }
+							/>
+						) ) }
+					</ItemGroup>
+				</VStack>
+			) }
+		</VStack>
+	);
+};
+
 const TemplatesTab = () => (
 	<>
 		<PanelBody
@@ -2064,6 +2265,10 @@ export const EditThemeSettingsModal = ( { onRequestClose } ) => {
 			title: __( 'Shadows', 'create-block-theme' ),
 		},
 		{
+			name: 'styles',
+			title: __( 'Styles', 'create-block-theme' ),
+		},
+		{
 			name: 'templates',
 			title: __( 'Templates', 'create-block-theme' ),
 		},
@@ -2079,6 +2284,8 @@ export const EditThemeSettingsModal = ( { onRequestClose } ) => {
 				return <TypographyTab />;
 			case 'shadows':
 				return <ShadowsTab />;
+			case 'styles':
+				return <StylesTab />;
 			case 'templates':
 				return <TemplatesTab />;
 			default:
