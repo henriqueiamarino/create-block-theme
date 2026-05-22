@@ -2018,59 +2018,61 @@ const formatBlockName = ( slug ) => {
 		.join( ' ' );
 };
 
-const formatChipLabel = ( key ) =>
-	key.startsWith( ':' ) ? key.slice( 1 ) : key;
+const formatPropertyLabel = ( key ) => {
+	const stripped = key.startsWith( ':' ) ? key.slice( 1 ) : key;
+	const capitalized =
+		stripped.charAt( 0 ).toUpperCase() + stripped.slice( 1 );
+	return sprintf(
+		/* translators: %s: theme.json property name, e.g. "Color" or "Typography". */
+		__( '%s customization', 'create-block-theme' ),
+		capitalized
+	);
+};
 
-const BlockStyleChip = ( { propertyKey, onRemove } ) => (
-	<span className="cbt-block-style-chip">
-		<span className="cbt-block-style-chip__label">
-			{ formatChipLabel( propertyKey ) }
-		</span>
-		<Button
-			icon={ lineSolid }
-			label={ sprintf(
-				// translators: %s: property name (e.g. "color").
-				__( 'Remove %s', 'create-block-theme' ),
-				formatChipLabel( propertyKey )
-			) }
-			onClick={ onRemove }
-			className="cbt-block-style-chip__remove"
-		/>
-	</span>
-);
-
-const BlockStyleRow = ( { slug, styles, onRemoveProperty, onRemoveBlock } ) => {
-	const props = Object.keys( styles || {} ).sort();
+const BlockCustomizationGroup = ( {
+	slug,
+	originalStyles,
+	currentStyles,
+	onToggleProperty,
+	onReset,
+	onRemoveAll,
+} ) => {
+	const properties = Object.keys( originalStyles || {} ).sort();
 	return (
-		<Item className="cbt-palette-list-item">
-			<HStack alignment="top" spacing={ 3 }>
-				<div className="cbt-block-style-row__wrap">
-					<span className="cbt-block-style-row__name">
-						{ formatBlockName( slug ) }
-					</span>
-					{ props.map( ( key ) => (
-						<BlockStyleChip
-							key={ key }
-							propertyKey={ key }
-							onRemove={ () => onRemoveProperty( slug, key ) }
-						/>
-					) ) }
-				</div>
-				<Button
-					icon={ lineSolid }
-					label={ sprintf(
-						// translators: %s: block name.
-						__(
-							'Remove all customizations for %s',
-							'create-block-theme'
-						),
-						formatBlockName( slug )
-					) }
-					onClick={ onRemoveBlock }
-					className="cbt-palette-swatch-button"
+		<VStack spacing={ 2 }>
+			<HStack justify="space-between" alignment="center">
+				<BaseControl.VisualLabel>
+					{ formatBlockName( slug ) }
+				</BaseControl.VisualLabel>
+				<DropdownMenu
+					icon={ moreVertical }
+					label={ __( 'Options', 'create-block-theme' ) }
+					controls={ [
+						{
+							title: __( 'Reset', 'create-block-theme' ),
+							onClick: onReset,
+						},
+						{
+							title: __( 'Remove all', 'create-block-theme' ),
+							onClick: onRemoveAll,
+						},
+					] }
 				/>
 			</HStack>
-		</Item>
+			<VStack spacing={ 1 }>
+				{ properties.map( ( key ) => (
+					<ToggleControl
+						key={ key }
+						__nextHasNoMarginBottom
+						label={ formatPropertyLabel( key ) }
+						checked={ Boolean(
+							currentStyles && currentStyles[ key ] !== undefined
+						) }
+						onChange={ ( on ) => onToggleProperty( slug, key, on ) }
+					/>
+				) ) }
+			</VStack>
+		</VStack>
 	);
 };
 
@@ -2088,7 +2090,7 @@ const StylesTab = () => {
 		}
 	}, [ themeBlockStyles ] );
 
-	const allBlocks = Object.keys( blockStyles ).sort();
+	const allBlocks = Object.keys( themeBlockStyles || {} ).sort();
 	const coreBlocks = allBlocks.filter( ( slug ) =>
 		slug.startsWith( 'core/' )
 	);
@@ -2096,37 +2098,49 @@ const StylesTab = () => {
 		( slug ) => ! slug.startsWith( 'core/' )
 	);
 
-	const removeBlock = ( slug ) => {
+	const toggleProperty = ( slug, key, on ) => {
 		const next = { ...blockStyles };
-		delete next[ slug ];
-		setBlockStyles( next );
-	};
-
-	const removeProperty = ( slug, key ) => {
-		const next = { ...blockStyles };
-		next[ slug ] = { ...next[ slug ] };
-		delete next[ slug ][ key ];
-		if ( Object.keys( next[ slug ] ).length === 0 ) {
-			delete next[ slug ];
+		next[ slug ] = { ...( next[ slug ] || {} ) };
+		if ( on ) {
+			next[ slug ][ key ] = themeBlockStyles[ slug ][ key ];
+		} else {
+			delete next[ slug ][ key ];
 		}
 		setBlockStyles( next );
 	};
 
-	const restoreFor = ( isCore ) => {
-		const next = { ...blockStyles };
-		Object.keys( themeBlockStyles || {} ).forEach( ( slug ) => {
-			if ( slug.startsWith( 'core/' ) === isCore ) {
-				next[ slug ] = themeBlockStyles[ slug ];
-			}
+	const resetBlock = ( slug ) => {
+		setBlockStyles( {
+			...blockStyles,
+			[ slug ]: themeBlockStyles[ slug ],
 		} );
-		setBlockStyles( next );
 	};
 
-	const restoreCore = () => restoreFor( true );
-	const restoreThirdParty = () => restoreFor( false );
+	const removeAllForBlock = ( slug ) => {
+		setBlockStyles( {
+			...blockStyles,
+			[ slug ]: {},
+		} );
+	};
+
+	const renderGroup = ( blocks ) => (
+		<VStack spacing={ 4 }>
+			{ blocks.map( ( slug ) => (
+				<BlockCustomizationGroup
+					key={ slug }
+					slug={ slug }
+					originalStyles={ themeBlockStyles[ slug ] }
+					currentStyles={ blockStyles[ slug ] }
+					onToggleProperty={ toggleProperty }
+					onReset={ () => resetBlock( slug ) }
+					onRemoveAll={ () => removeAllForBlock( slug ) }
+				/>
+			) ) }
+		</VStack>
+	);
 
 	return (
-		<VStack spacing={ 4 }>
+		<>
 			<Text>
 				{ __(
 					'Lists block-level customizations defined in your theme’s theme.json. Removing one strips the theme’s defaults for that block — users’ own Site Editor changes on top remain.',
@@ -2134,80 +2148,22 @@ const StylesTab = () => {
 				) }
 			</Text>
 			{ coreBlocks.length > 0 && (
-				<VStack spacing={ 1 }>
-					<HStack
-						className="cbt-palette-section-header"
-						justify="space-between"
-						alignment="center"
-					>
-						<BaseControl.VisualLabel>
-							{ __( 'Core blocks', 'create-block-theme' ) }
-						</BaseControl.VisualLabel>
-						<DropdownMenu
-							icon={ moreVertical }
-							label={ __( 'Options', 'create-block-theme' ) }
-							controls={ [
-								{
-									title: __(
-										'Restore all core blocks',
-										'create-block-theme'
-									),
-									onClick: restoreCore,
-								},
-							] }
-						/>
-					</HStack>
-					<ItemGroup isBordered isSeparated>
-						{ coreBlocks.map( ( slug ) => (
-							<BlockStyleRow
-								key={ slug }
-								slug={ slug }
-								styles={ blockStyles[ slug ] }
-								onRemoveProperty={ removeProperty }
-								onRemoveBlock={ () => removeBlock( slug ) }
-							/>
-						) ) }
-					</ItemGroup>
-				</VStack>
+				<PanelBody
+					title={ __( 'Core blocks', 'create-block-theme' ) }
+					initialOpen
+				>
+					{ renderGroup( coreBlocks ) }
+				</PanelBody>
 			) }
 			{ thirdPartyBlocks.length > 0 && (
-				<VStack spacing={ 1 }>
-					<HStack
-						className="cbt-palette-section-header"
-						justify="space-between"
-						alignment="center"
-					>
-						<BaseControl.VisualLabel>
-							{ __( 'Third-party blocks', 'create-block-theme' ) }
-						</BaseControl.VisualLabel>
-						<DropdownMenu
-							icon={ moreVertical }
-							label={ __( 'Options', 'create-block-theme' ) }
-							controls={ [
-								{
-									title: __(
-										'Restore all third-party blocks',
-										'create-block-theme'
-									),
-									onClick: restoreThirdParty,
-								},
-							] }
-						/>
-					</HStack>
-					<ItemGroup isBordered isSeparated>
-						{ thirdPartyBlocks.map( ( slug ) => (
-							<BlockStyleRow
-								key={ slug }
-								slug={ slug }
-								styles={ blockStyles[ slug ] }
-								onRemoveProperty={ removeProperty }
-								onRemoveBlock={ () => removeBlock( slug ) }
-							/>
-						) ) }
-					</ItemGroup>
-				</VStack>
+				<PanelBody
+					title={ __( 'Third-party blocks', 'create-block-theme' ) }
+					initialOpen
+				>
+					{ renderGroup( thirdPartyBlocks ) }
+				</PanelBody>
 			) }
-		</VStack>
+		</>
 	);
 };
 

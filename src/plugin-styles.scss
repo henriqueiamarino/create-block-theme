@@ -131,60 +131,6 @@ $modal-footer-height: 70px;
 	word-wrap: normal !important;
 }
 
-.cbt-block-style-row__wrap {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 4px;
-	flex: 1;
-	min-width: 0;
-}
-
-.cbt-block-style-row__name {
-	margin-right: 8px;
-}
-
-.cbt-block-style-chip {
-	display: inline-flex;
-	align-items: center;
-	padding: 2px 4px 2px 10px;
-	background: rgba(0, 0, 0, 0.04);
-	border-radius: 4px;
-	font-size: 13px;
-	color: rgba(0, 0, 0, 0.7);
-	transition: background 0.15s ease, color 0.15s ease;
-}
-
-.cbt-block-style-chip:hover {
-	background: rgba(0, 0, 0, 0.08);
-	color: rgba(0, 0, 0, 1);
-}
-
-.cbt-block-style-chip__label {
-	white-space: nowrap;
-}
-
-.cbt-block-style-chip__remove {
-	padding: 0 !important;
-	min-width: 20px !important;
-	width: 20px !important;
-	height: 20px !important;
-	background: transparent !important;
-	color: inherit !important;
-	box-shadow: none !important;
-	margin-left: 0 !important;
-
-	&:hover {
-		background: transparent !important;
-		color: inherit !important;
-	}
-
-	svg {
-		width: 14px;
-		height: 14px;
-	}
-}
-
 .cbt-save-disclaimer {
 	padding-top: 16px;
 	padding-bottom: 16px;
