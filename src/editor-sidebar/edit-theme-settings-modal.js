@@ -44,7 +44,13 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalNavigatorScreen as NavigatorScreen,
 } from '@wordpress/components';
-import { plus, moreVertical, lineSolid, chevronRight } from '@wordpress/icons';
+import {
+	plus,
+	moreVertical,
+	lineSolid,
+	chevronRight,
+	info,
+} from '@wordpress/icons';
 
 const DEFAULT_PRESETS_DEFAULTS = {
 	defaultPalette: true,
@@ -64,6 +70,26 @@ const COLOR_SETTINGS_DEFAULTS = {
 	...CUSTOM_PRESETS_DEFAULTS,
 };
 
+const ToggleWithInfo = ( { label, help, checked, onChange } ) => (
+	<HStack alignment="center" spacing={ 2 }>
+		<FlexBlock>
+			<ToggleControl
+				__nextHasNoMarginBottom
+				label={ label }
+				checked={ checked }
+				onChange={ onChange }
+			/>
+		</FlexBlock>
+		<Button
+			icon={ info }
+			iconSize={ 20 }
+			label={ help }
+			showTooltip
+			className="cbt-info-button"
+		/>
+	</HStack>
+);
+
 const ColorSettingsPanel = () => {
 	const [ settings, setSettings ] = useState( COLOR_SETTINGS_DEFAULTS );
 
@@ -79,7 +105,11 @@ const ColorSettingsPanel = () => {
 	return (
 		<VStack spacing={ 8 }>
 			<VStack spacing={ 1 }>
-				<HStack justify="space-between" alignment="center">
+				<HStack
+					className="cbt-palette-section-header"
+					justify="space-between"
+					alignment="center"
+				>
 					<BaseControl.VisualLabel>
 						{ __( 'Default presets', 'create-block-theme' ) }
 					</BaseControl.VisualLabel>
@@ -125,7 +155,11 @@ const ColorSettingsPanel = () => {
 				</VStack>
 			</VStack>
 			<VStack spacing={ 1 }>
-				<HStack justify="space-between" alignment="center">
+				<HStack
+					className="cbt-palette-section-header"
+					justify="space-between"
+					alignment="center"
+				>
 					<BaseControl.VisualLabel>
 						{ __( 'Custom presets', 'create-block-theme' ) }
 					</BaseControl.VisualLabel>
@@ -167,9 +201,8 @@ const ColorSettingsPanel = () => {
 					/>
 					<ToggleControl
 						__nextHasNoMarginBottom
-						label={ __( 'Link color', 'create-block-theme' ) }
-						help={ __(
-							'Enable the link color control.',
+						label={ __(
+							'Link color control',
 							'create-block-theme'
 						) }
 						checked={ settings.link }
@@ -230,6 +263,7 @@ const PaletteRow = ( { entry, onUpdate, onRemove } ) => (
 			</FlexBlock>
 			<Button
 				icon={ lineSolid }
+				iconSize={ 20 }
 				label={ __( 'Remove color', 'create-block-theme' ) }
 				onClick={ onRemove }
 				className="cbt-palette-swatch-button"
@@ -280,9 +314,10 @@ const PalettePanel = () => {
 				<BaseControl.VisualLabel>
 					{ __( 'Color units', 'create-block-theme' ) }
 				</BaseControl.VisualLabel>
-				<HStack spacing={ 1 } justify="flex-end">
+				<HStack spacing={ 0 } justify="flex-end">
 					<Button
 						icon={ plus }
+						iconSize={ 18 }
 						label={ __( 'Add new color', 'create-block-theme' ) }
 						onClick={ addColor }
 						showTooltip
@@ -375,6 +410,7 @@ const GradientRow = ( { entry, onUpdate, onRemove } ) => (
 			</FlexBlock>
 			<Button
 				icon={ lineSolid }
+				iconSize={ 20 }
 				label={ __( 'Remove gradient', 'create-block-theme' ) }
 				onClick={ onRemove }
 				className="cbt-palette-swatch-button"
@@ -428,9 +464,10 @@ const GradientPanel = () => {
 				<BaseControl.VisualLabel>
 					{ __( 'Color blends', 'create-block-theme' ) }
 				</BaseControl.VisualLabel>
-				<HStack spacing={ 1 } justify="flex-end">
+				<HStack spacing={ 0 } justify="flex-end">
 					<Button
 						icon={ plus }
+						iconSize={ 18 }
 						label={ __( 'Add new gradient', 'create-block-theme' ) }
 						onClick={ addGradient }
 						showTooltip
@@ -577,6 +614,7 @@ const DuotoneRow = ( { entry, onUpdate, onRemove } ) => {
 				</FlexBlock>
 				<Button
 					icon={ lineSolid }
+					iconSize={ 20 }
 					label={ __( 'Remove duotone', 'create-block-theme' ) }
 					onClick={ onRemove }
 					className="cbt-palette-swatch-button"
@@ -630,9 +668,10 @@ const DuotonePanel = () => {
 				<BaseControl.VisualLabel>
 					{ __( 'Color filters', 'create-block-theme' ) }
 				</BaseControl.VisualLabel>
-				<HStack spacing={ 1 } justify="flex-end">
+				<HStack spacing={ 0 } justify="flex-end">
 					<Button
 						icon={ plus }
+						iconSize={ 18 }
 						label={ __( 'Add new duotone', 'create-block-theme' ) }
 						onClick={ addDuotone }
 						showTooltip
@@ -746,9 +785,8 @@ const LayoutPanel = () => {
 					] }
 				/>
 			</HStack>
-			<VStack spacing={ 3 }>
-				<ToggleControl
-					__nextHasNoMarginBottom
+			<VStack spacing={ 2 }>
+				<ToggleWithInfo
 					label={ __( 'Appearance tools', 'create-block-theme' ) }
 					help={ __(
 						'Enable additional design tools (borders, colors, dimensions) in the block inspector.',
@@ -757,8 +795,7 @@ const LayoutPanel = () => {
 					checked={ settings.appearanceTools }
 					onChange={ update( 'appearanceTools' ) }
 				/>
-				<ToggleControl
-					__nextHasNoMarginBottom
+				<ToggleWithInfo
 					label={ __(
 						'Root padding-aware alignments',
 						'create-block-theme'
@@ -770,8 +807,7 @@ const LayoutPanel = () => {
 					checked={ settings.useRootPaddingAwareAlignments }
 					onChange={ update( 'useRootPaddingAwareAlignments' ) }
 				/>
-				<ToggleControl
-					__nextHasNoMarginBottom
+				<ToggleWithInfo
 					label={ __( 'Allow layout editing', 'create-block-theme' ) }
 					help={ __(
 						'Let users edit layout properties (content width, wide width) in the Editor.',
@@ -784,10 +820,6 @@ const LayoutPanel = () => {
 					__nextHasNoMarginBottom
 					label={ __(
 						'Allow custom content and wide size',
-						'create-block-theme'
-					) }
-					help={ __(
-						'Allow custom values for content and wide size beyond the theme defaults.',
 						'create-block-theme'
 					) }
 					checked={ settings.allowCustomContentAndWideSize }
@@ -834,10 +866,6 @@ const SpacingSettingsPanel = () => {
 				<ToggleControl
 					__nextHasNoMarginBottom
 					label={ __( 'Custom spacing size', 'create-block-theme' ) }
-					help={ __(
-						'Allow users to enter custom spacing values.',
-						'create-block-theme'
-					) }
 					checked={ settings.customSpacingSize }
 					onChange={ update( 'customSpacingSize' ) }
 				/>
@@ -847,40 +875,24 @@ const SpacingSettingsPanel = () => {
 						'Default spacing sizes',
 						'create-block-theme'
 					) }
-					help={ __(
-						'Show the default WordPress spacing presets.',
-						'create-block-theme'
-					) }
 					checked={ settings.defaultSpacingSizes }
 					onChange={ update( 'defaultSpacingSizes' ) }
 				/>
 				<ToggleControl
 					__nextHasNoMarginBottom
 					label={ __( 'Padding controls', 'create-block-theme' ) }
-					help={ __(
-						'Enable padding controls in the Editor.',
-						'create-block-theme'
-					) }
 					checked={ settings.padding }
 					onChange={ update( 'padding' ) }
 				/>
 				<ToggleControl
 					__nextHasNoMarginBottom
 					label={ __( 'Margin controls', 'create-block-theme' ) }
-					help={ __(
-						'Enable margin controls in the Editor.',
-						'create-block-theme'
-					) }
 					checked={ settings.margin }
 					onChange={ update( 'margin' ) }
 				/>
 				<ToggleControl
 					__nextHasNoMarginBottom
 					label={ __( 'Block gap controls', 'create-block-theme' ) }
-					help={ __(
-						'Enable block gap controls in the Editor.',
-						'create-block-theme'
-					) }
 					checked={ settings.blockGap }
 					onChange={ update( 'blockGap' ) }
 				/>
@@ -927,6 +939,7 @@ const SpacingSizeRow = ( { entry, onUpdate, onRemove } ) => (
 			</FlexBlock>
 			<Button
 				icon={ lineSolid }
+				iconSize={ 20 }
 				label={ __( 'Remove size', 'create-block-theme' ) }
 				onClick={ onRemove }
 				className="cbt-palette-swatch-button"
@@ -977,9 +990,10 @@ const SpacingPresetsPanel = () => {
 				<BaseControl.VisualLabel>
 					{ __( 'Spacing sizes', 'create-block-theme' ) }
 				</BaseControl.VisualLabel>
-				<HStack spacing={ 1 } justify="flex-end">
+				<HStack spacing={ 0 } justify="flex-end">
 					<Button
 						icon={ plus }
+						iconSize={ 18 }
 						label={ __( 'Add new size', 'create-block-theme' ) }
 						onClick={ addSize }
 						showTooltip
@@ -1110,25 +1124,16 @@ const TypographySettingsPanel = () => {
 				<ToggleControl
 					__nextHasNoMarginBottom
 					label={ __( 'Default font sizes', 'create-block-theme' ) }
-					help={ __(
-						'Show the default WordPress font size presets.',
-						'create-block-theme'
-					) }
 					checked={ settings.defaultFontSizes }
 					onChange={ update( 'defaultFontSizes' ) }
 				/>
 				<ToggleControl
 					__nextHasNoMarginBottom
 					label={ __( 'Drop cap', 'create-block-theme' ) }
-					help={ __(
-						'Enable drop caps for paragraphs.',
-						'create-block-theme'
-					) }
 					checked={ settings.dropCap }
 					onChange={ update( 'dropCap' ) }
 				/>
-				<ToggleControl
-					__nextHasNoMarginBottom
+				<ToggleWithInfo
 					label={ __( 'Fluid typography', 'create-block-theme' ) }
 					help={ __(
 						'Scale font sizes based on viewport width.',
@@ -1242,6 +1247,7 @@ const FontFamilyListItem = ( { entry, index, onUpdate } ) => {
 				</FlexBlock>
 				<Button
 					icon={ chevronRight }
+					iconSize={ 20 }
 					label={ __( 'Edit font faces', 'create-block-theme' ) }
 					onClick={ () => navigator.goTo( `/edit/${ index }` ) }
 					className="cbt-palette-swatch-button"
@@ -1320,9 +1326,10 @@ const FontFamilyList = ( { families, onAdd, onUpdate } ) => (
 			<BaseControl.VisualLabel>
 				{ __( 'Font families', 'create-block-theme' ) }
 			</BaseControl.VisualLabel>
-			<HStack spacing={ 1 } justify="flex-end">
+			<HStack spacing={ 0 } justify="flex-end">
 				<Button
 					icon={ plus }
+					iconSize={ 18 }
 					label={ __( 'Add new family', 'create-block-theme' ) }
 					onClick={ onAdd }
 					showTooltip
@@ -1410,9 +1417,10 @@ const FontFamilyEditor = ( { families, onUpdate, onRemove } ) => {
 				<BaseControl.VisualLabel>
 					{ __( 'Font family entries', 'create-block-theme' ) }
 				</BaseControl.VisualLabel>
-				<HStack spacing={ 1 } justify="flex-end">
+				<HStack spacing={ 0 } justify="flex-end">
 					<Button
 						icon={ plus }
+						iconSize={ 18 }
 						label={ __( 'Add font face', 'create-block-theme' ) }
 						onClick={ addFace }
 						showTooltip
@@ -1547,6 +1555,7 @@ const FontSizeRow = ( { entry, onUpdate, onRemove } ) => (
 			</FlexBlock>
 			<Button
 				icon={ lineSolid }
+				iconSize={ 20 }
 				label={ __( 'Remove font size', 'create-block-theme' ) }
 				onClick={ onRemove }
 				className="cbt-palette-swatch-button"
@@ -1597,9 +1606,10 @@ const FontSizesPanel = () => {
 				<BaseControl.VisualLabel>
 					{ __( 'Font sizes', 'create-block-theme' ) }
 				</BaseControl.VisualLabel>
-				<HStack spacing={ 1 } justify="flex-end">
+				<HStack spacing={ 0 } justify="flex-end">
 					<Button
 						icon={ plus }
+						iconSize={ 18 }
 						label={ __( 'Add new size', 'create-block-theme' ) }
 						onClick={ addSize }
 						showTooltip
@@ -1682,6 +1692,7 @@ const TemplatePartRow = ( { entry, onUpdate, onRemove } ) => (
 			</FlexBlock>
 			<Button
 				icon={ lineSolid }
+				iconSize={ 20 }
 				label={ __( 'Remove template part', 'create-block-theme' ) }
 				onClick={ onRemove }
 				className="cbt-palette-swatch-button"
@@ -1724,9 +1735,9 @@ const TemplatePartsPanel = () => {
 
 	return (
 		<VStack spacing={ 4 }>
-			<Text>
+			<Text variant="muted" size={ 12 }>
 				{ __(
-					'Template Parts are reusable sections of a theme such as headers, footers, and sidebars. Each part registered here can be edited visually in the Site Editor.',
+					'Reusable sections such as headers, footers, and sidebars. Each part registered here can be edited visually in the Site Editor.',
 					'create-block-theme'
 				) }
 			</Text>
@@ -1739,9 +1750,10 @@ const TemplatePartsPanel = () => {
 					<BaseControl.VisualLabel>
 						{ __( 'Template parts', 'create-block-theme' ) }
 					</BaseControl.VisualLabel>
-					<HStack spacing={ 1 } justify="flex-end">
+					<HStack spacing={ 0 } justify="flex-end">
 						<Button
 							icon={ plus }
+							iconSize={ 18 }
 							label={ __(
 								'Add new template part',
 								'create-block-theme'
@@ -1826,6 +1838,7 @@ const CustomTemplateRow = ( { entry, onUpdate, onRemove } ) => (
 			</FlexBlock>
 			<Button
 				icon={ lineSolid }
+				iconSize={ 20 }
 				label={ __( 'Remove custom template', 'create-block-theme' ) }
 				onClick={ onRemove }
 				className="cbt-palette-swatch-button"
@@ -1870,7 +1883,7 @@ const CustomTemplatesPanel = () => {
 
 	return (
 		<VStack spacing={ 4 }>
-			<Text>
+			<Text variant="muted" size={ 12 }>
 				{ __(
 					'Custom Templates are alternative page layouts users can select when editing a post or page. Each template registered here matches a file in your theme’s templates/ folder.',
 					'create-block-theme'
@@ -1885,9 +1898,10 @@ const CustomTemplatesPanel = () => {
 					<BaseControl.VisualLabel>
 						{ __( 'Custom templates', 'create-block-theme' ) }
 					</BaseControl.VisualLabel>
-					<HStack spacing={ 1 } justify="flex-end">
+					<HStack spacing={ 0 } justify="flex-end">
 						<Button
 							icon={ plus }
+							iconSize={ 18 }
 							label={ __(
 								'Add new custom template',
 								'create-block-theme'
@@ -1943,6 +1957,7 @@ const ShadowRow = ( { name, onRemove } ) => (
 			<FlexBlock>{ name }</FlexBlock>
 			<Button
 				icon={ lineSolid }
+				iconSize={ 20 }
 				label={ __( 'Remove shadow', 'create-block-theme' ) }
 				onClick={ onRemove }
 				className="cbt-palette-swatch-button"
@@ -1964,49 +1979,56 @@ const ShadowsTab = () => {
 	);
 
 	return (
-		<VStack spacing={ 4 }>
-			<Text>
-				{ __(
-					'Remove default shadow presets you don’t want available in the editor. To create or edit shadow values, use the Site Editor’s Styles → Shadows panel.',
-					'create-block-theme'
-				) }
-			</Text>
-			<VStack spacing={ 1 }>
-				<HStack
-					className="cbt-palette-section-header"
-					justify="space-between"
-					alignment="center"
-				>
-					<BaseControl.VisualLabel>
-						{ __( 'Default shadows', 'create-block-theme' ) }
-					</BaseControl.VisualLabel>
-					<DropdownMenu
-						icon={ moreVertical }
-						label={ __( 'Options', 'create-block-theme' ) }
-						controls={ [
-							{
-								title: __(
-									'Restore all defaults',
-									'create-block-theme'
-								),
-								onClick: restoreDefaults,
-							},
-						] }
-					/>
-				</HStack>
-				{ visibleDefaults.length > 0 && (
-					<ItemGroup isBordered isSeparated>
-						{ visibleDefaults.map( ( entry ) => (
-							<ShadowRow
-								key={ entry.slug }
-								name={ entry.name }
-								onRemove={ () => removeDefault( entry.slug ) }
-							/>
-						) ) }
-					</ItemGroup>
-				) }
+		<PanelBody
+			title={ __( 'Default Presets', 'create-block-theme' ) }
+			initialOpen
+		>
+			<VStack spacing={ 4 }>
+				<Text variant="muted" size={ 12 }>
+					{ __(
+						'Removing a preset hides it from the editor—shadow values stay editable in the Site Editor.',
+						'create-block-theme'
+					) }
+				</Text>
+				<VStack spacing={ 1 }>
+					<HStack
+						className="cbt-palette-section-header"
+						justify="space-between"
+						alignment="center"
+					>
+						<BaseControl.VisualLabel>
+							{ __( 'Shadows', 'create-block-theme' ) }
+						</BaseControl.VisualLabel>
+						<DropdownMenu
+							icon={ moreVertical }
+							label={ __( 'Options', 'create-block-theme' ) }
+							controls={ [
+								{
+									title: __(
+										'Reset Shadows',
+										'create-block-theme'
+									),
+									onClick: restoreDefaults,
+								},
+							] }
+						/>
+					</HStack>
+					{ visibleDefaults.length > 0 && (
+						<ItemGroup isBordered isSeparated>
+							{ visibleDefaults.map( ( entry ) => (
+								<ShadowRow
+									key={ entry.slug }
+									name={ entry.name }
+									onRemove={ () =>
+										removeDefault( entry.slug )
+									}
+								/>
+							) ) }
+						</ItemGroup>
+					) }
+				</VStack>
 			</VStack>
-		</VStack>
+		</PanelBody>
 	);
 };
 
@@ -2020,13 +2042,7 @@ const formatBlockName = ( slug ) => {
 
 const formatPropertyLabel = ( key ) => {
 	const stripped = key.startsWith( ':' ) ? key.slice( 1 ) : key;
-	const capitalized =
-		stripped.charAt( 0 ).toUpperCase() + stripped.slice( 1 );
-	return sprintf(
-		/* translators: %s: theme.json property name, e.g. "Color" or "Typography". */
-		__( '%s customization', 'create-block-theme' ),
-		capitalized
-	);
+	return stripped.charAt( 0 ).toUpperCase() + stripped.slice( 1 );
 };
 
 const BlockCustomizationGroup = ( {
@@ -2039,8 +2055,12 @@ const BlockCustomizationGroup = ( {
 } ) => {
 	const properties = Object.keys( originalStyles || {} ).sort();
 	return (
-		<VStack spacing={ 2 }>
-			<HStack justify="space-between" alignment="center">
+		<VStack spacing={ 1 }>
+			<HStack
+				className="cbt-palette-section-header"
+				justify="space-between"
+				alignment="center"
+			>
 				<BaseControl.VisualLabel>
 					{ formatBlockName( slug ) }
 				</BaseControl.VisualLabel>
@@ -2049,17 +2069,23 @@ const BlockCustomizationGroup = ( {
 					label={ __( 'Options', 'create-block-theme' ) }
 					controls={ [
 						{
-							title: __( 'Reset', 'create-block-theme' ),
-							onClick: onReset,
+							title: __(
+								'Remove all presets',
+								'create-block-theme'
+							),
+							onClick: onRemoveAll,
 						},
 						{
-							title: __( 'Remove all', 'create-block-theme' ),
-							onClick: onRemoveAll,
+							title: __(
+								'Reset default presets',
+								'create-block-theme'
+							),
+							onClick: onReset,
 						},
 					] }
 				/>
 			</HStack>
-			<VStack spacing={ 1 }>
+			<VStack spacing={ 3 }>
 				{ properties.map( ( key ) => (
 					<ToggleControl
 						key={ key }
@@ -2124,7 +2150,7 @@ const StylesTab = () => {
 	};
 
 	const renderGroup = ( blocks ) => (
-		<VStack spacing={ 4 }>
+		<VStack spacing={ 8 }>
 			{ blocks.map( ( slug ) => (
 				<BlockCustomizationGroup
 					key={ slug }
@@ -2139,28 +2165,43 @@ const StylesTab = () => {
 		</VStack>
 	);
 
+	const panelIntro = (
+		<Text variant="muted" size={ 12 }>
+			{ __(
+				'Toggling off strips the theme’s default—users’ Site Editor changes on top remain.',
+				'create-block-theme'
+			) }
+		</Text>
+	);
+
 	return (
 		<>
-			<Text>
-				{ __(
-					'Lists block-level customizations defined in your theme’s theme.json. Removing one strips the theme’s defaults for that block — users’ own Site Editor changes on top remain.',
-					'create-block-theme'
-				) }
-			</Text>
 			{ coreBlocks.length > 0 && (
 				<PanelBody
-					title={ __( 'Core blocks', 'create-block-theme' ) }
+					title={ __(
+						'Core Blocks Customization',
+						'create-block-theme'
+					) }
 					initialOpen
 				>
-					{ renderGroup( coreBlocks ) }
+					<VStack spacing={ 4 }>
+						{ panelIntro }
+						{ renderGroup( coreBlocks ) }
+					</VStack>
 				</PanelBody>
 			) }
 			{ thirdPartyBlocks.length > 0 && (
 				<PanelBody
-					title={ __( 'Third-party blocks', 'create-block-theme' ) }
+					title={ __(
+						'Third-Party Blocks Customization',
+						'create-block-theme'
+					) }
 					initialOpen
 				>
-					{ renderGroup( thirdPartyBlocks ) }
+					<VStack spacing={ 4 }>
+						{ panelIntro }
+						{ renderGroup( thirdPartyBlocks ) }
+					</VStack>
 				</PanelBody>
 			) }
 		</>
